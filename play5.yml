@@ -1,0 +1,43 @@
+---
+- name: Generate router configurations from file
+  gather_facts: no
+  hosts: router
+
+  roles:
+    - testrole2
+
+
+
+
+
+
+  /etc/ansible/roles/testrole2/tasks/main.yml
+---
+- name: Generate router configurations
+  template:
+    src=router.j2
+    dest=/root/config/{{item.hostname}}.txt
+  with_items: "{{ routers }}"
+
+
+
+
+
+
+  /etc/ansible/roles/testrole2/template/router.j2
+
+  hostname {{item.hostname}}
+  !
+  interface lo1
+  ip address {{item.loopback}}
+
+
+
+
+
+  /etc/ansible/roles/testrole2/vars/main.yml
+
+  ---
+  routers:
+    - hostname: RR1
+      loopback: 11.11.11.11 255.255.255.0   

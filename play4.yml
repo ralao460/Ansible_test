@@ -1,0 +1,56 @@
+---
+- name: Playbook on loops
+  gather_facts: no
+  hosts: router
+
+  tasks:
+    - name: configure Router as relay agent 
+      ios_config: 
+        lines: 
+          - ip helper-address 172.16.1.1 
+          - ip helper-address 172.16.2.1
+        parents: "{{ item }}"
+      with_items: 
+        - Interface Ethernet 1/1
+        - Interface Ethernet 1/2
+
+       notify: Send notification
+  handlers:
+    - name: Send notification
+      debug:
+        msg: "New configuration detected on router"
+        
+
+
+
+# --- 
+# - name: Playbook to create multiple user on a linux machine
+#   gather_facts: True
+#   hosts: router
+
+#   tasks:
+#     - name: Create Multiple Users
+#       user:
+#         name: "{{ item }}"
+#       loop:
+#         - test1
+#         - test2
+#         - test3
+#         - test4
+# ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

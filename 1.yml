@@ -1,0 +1,168 @@
+---
+- name: sample_playbook
+  hosts: all-servers
+  gather_fact: no
+  remote_user: root
+  become: True 
+
+  vars:
+    new_content: "This is my first sample playbook"
+
+
+  tasks:
+    - name: copy new_content
+      copy:
+        content: "{{new_content}}"
+        dest: /etc/ansible/hosts
+
+
+    - name: install httpd
+      yum:
+        name: httpd
+        state: latest
+
+    - name: start web web server 
+      service:
+        name: httpd
+        state: started
+
+
+
+
+
+---
+- name: PlayBook to configure Banner
+  hosts: all-servers
+
+  tasks:
+    - name: configure Banner MOTD
+      IOS_banner:
+        banner: MOTD
+        text: |
+          Welcome, unauthorize access is prohibited
+        state: present
+
+
+    - name: configure Login MOTD
+      IOS_banner:
+        banner: Login
+        text: |
+          Welcome to the terminal, only authorized personnel
+        state: present
+
+
+    - name: Configure banner MOTD
+      ios_banner: 
+        banner: MOTD
+        text: "{{lookup ('file', './etc/config.cfg') }}"
+        state: present
+
+
+
+
+
+  - name: show version on remote devices running ios
+    ios_command:
+      commands: show version
+
+
+  - name: show version on remote device running ios and check if result contains IOS
+    ios_command:
+      commands: show version
+      wait_for: result[0] contains IOS
+
+  - name : show version and show interface on a remote device
+    ios_command:
+      commands: 
+        - show version
+        - show interface
+      wait_for: 
+        - result[0] contains IOS
+        - result[1] contains loopback0
+
+
+   - name : answering prompts from the cisco cli
+     ios_command:
+      commands: 'clear counters GigabitEthernet0/1'
+      prompt: 'clear counters for this interface\[confirm\]'
+      answer: 'yes'
+
+      commands: 'clear counters for GigabitEthernet0/7'
+      prompt: '[confirm]'
+      answer: '\r'
+
+
+    - name: Configure basic interface settings
+      ios_config: 
+        lines:
+          - description test imterface
+          - ip address 1.1.1.1 255.255.255.0
+
+        parents: interface GigabitEthernet0/9
+
+    - name: configure multiple ip-helper address on multiple interfaces
+      ios_config:
+        lines:
+          - ip helper-address 1.2.1.3
+          - ip helper-address 4.3.5.6
+        parents:
+          - interface Ethernet5
+          - interface Ethernet8
+        parents: "{{ item }}"
+      with_items: 
+        - interface Ethernet8
+        - interface Ethernet5
+
+
+
+    - name: Gather all Legacy facts
+      ios_facts:
+        gathet_subset: all
+
+    - name: Gather only the config and default facts
+      ios_facts:
+        gather_subset:
+          - config
+
+
+
+
+---
+- name: Another PlayBook
+hosts: routers
+
+tasks: 
+  - name: Deploy SNMP configurations to devices
+    ios_config:
+      src: "./configs/snmp.cfg"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
